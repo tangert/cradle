@@ -69,7 +69,7 @@ const ALL_DELIMETERS = {
   NEW_LINE
 }
 
-function Tokenizer(){
+function Tokenizer() {
 
   // Delimeters
   const { NODE_OPEN, NODE_CLOSE } = NODE_DELIMETERS
@@ -99,8 +99,9 @@ function Tokenizer(){
       || this.checkMultilineClose(stream)
       || this.checkNewLine(stream)
 
+
       if(!checked) {
-        console.error('u fucked up')
+        console.error('u fucked SYNTAX ERROR up')
         return
       }
       
@@ -113,6 +114,7 @@ function Tokenizer(){
       // if(formattedToken.lexeme.length > 0) {
       //   // Only add non-0 length tokens
       // }
+      console.log(checked.lexeme)
       tokens.push(checked)
       stream = stream.slice(checked.lexeme.length);
     }
@@ -189,7 +191,6 @@ function Tokenizer(){
 
   // UTILITY FOR CREATING TOKEN OBJECTS
   this.createToken = function(type, lexeme){
-    // const l = lexeme && type === 'CONTENT' ? lexeme.trim() : lexeme
     return { type, lexeme }
   }
 }
@@ -199,8 +200,12 @@ function Parser(tokens){}
 
 // transpile to various output styles
 function Transpiler(tree){
+  // DOT graph description language
   this.toDOT = function(){}
+  // UML diagram
   this.toUML = function(){}
+  // transforms this into an executable CLUI tree with autocomplete.
+  this.toCLUI = function(){}
 }
 
 //  testing
@@ -212,7 +217,7 @@ const input = `
           but if you fail you go back to [[start]]
         }
         here's an example where the nodes are linked back {
-          by linking to [[]]
+          by linking to [[start]]
         }
       }
       (this node is in paralell to first step.
@@ -234,7 +239,48 @@ const ex2 = `
 // TODO: fix order of tokens being eaten up lol
 const t = new Tokenizer()
 const tokens = t.tokenize(input)
-log("INPUT:")
-log(input)
 log("\nTOKENS:")
 log(tokens)
+log("INPUT:")
+log(input)
+
+/*
+
+// arrows are links between nodes
+// nodes are simply text
+// parallel branches are contained in curly braces
+// you can use wikilink syntax to link notes together
+// transpiles to DOT or UML 
+starting node -> child node -> another child -> link back to [[starting node]]
+
+start {
+  branch 1  -> step 1 -> step 2 -> step 3 {
+    branch 1.3 -> go back to [[start]]
+  } 
+  branch 2 -> step 1 -> step 2 -> step 3
+} 
+
+im dependent on this! <-> and im dependent on that! 
+
+if i do this {
+  go [[here]]
+  otherwise go [[there]]
+}
+here -> do this next 
+there -> do this next
+
+
+// ideal UX here:
+
+
+write it in a "repl" type environment with auto complete
+
+
+
+thoughts... if you want to structure your data, you can place it into parentheses
+(title: here, label: this is where u need to go.)
+// more ideas:
+then you can refference the wikilinks like [[ title='here' and label contains 'u' ]]
+// kinda like roam
+
+*/
