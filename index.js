@@ -104,8 +104,6 @@ function Tokenizer(){
         return
       }
       tokens.push(checked)
-      console.log(checked)
-      console.log(checked.length)
       stream = stream.slice(checked.lexeme.length);
     }
     return tokens;
@@ -120,6 +118,8 @@ function Tokenizer(){
   this.checkContent = function(inp) {
     const m = inp.match(contentRule);
     if (m && m[0]) {
+      console.log("content:" + m[0])
+      console.log("content:" + m[0].trim())
       return this.createToken('CONTENT', m[0])
     }
     return null
@@ -127,7 +127,6 @@ function Tokenizer(){
   // NODES
   this.checkNodeOpen = function(inp){
     const m = inp.match(nodeOpenRule);
-    console.log(m)
     if (m && m[0]) {
       return this.createToken('NODE_OPEN', m[0])
     }
@@ -182,6 +181,7 @@ function Tokenizer(){
 
   // UTILITY FOR CREATING TOKEN OBJECTS
   this.createToken = function(type, lexeme){
+    // const l = lexeme && type === 'CONTENT' ? lexeme.trim() : lexeme
     return { type, lexeme }
   }
 }
@@ -194,3 +194,38 @@ function Transpiler(tree){
   this.toDOT = function(){}
   this.toUML = function(){}
 }
+
+//  testing
+const input = `
+ {
+    start {
+      the first step is this {
+        then here's the second node {
+          but if you fail you go back to [[start]]
+        }
+        here's an example where the nodes are linked back {
+          by linking to [[]]
+        }
+      }
+      (this node is in paralell to first step.
+      you can view it as another option. it's multiline so you wrap it in parentheses)
+  }
+`
+
+const ex2 = `
+  starting node {
+    child node {
+      another child node {
+        here's a link back to [[starting node]]
+      }
+    }
+  }
+`
+
+// TODO: remove whitespace from content and tokens
+const t = new Tokenizer()
+const tokens = t.tokenize(input)
+log("INPUT:")
+log(input)
+log("\nTOKENS:")
+log(tokens)
