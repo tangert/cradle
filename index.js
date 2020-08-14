@@ -103,6 +103,16 @@ function Tokenizer(){
         console.error('u fucked up')
         return
       }
+      
+      // Only push the trimmed version of the lexeme, but keep it in the original to continue parsing correctly
+      // const formattedToken = {
+      //   type: checked.type,
+      //   lexeme: checked.lexeme.trim()
+      // };
+
+      // if(formattedToken.lexeme.length > 0) {
+      //   // Only add non-0 length tokens
+      // }
       tokens.push(checked)
       stream = stream.slice(checked.lexeme.length);
     }
@@ -118,8 +128,6 @@ function Tokenizer(){
   this.checkContent = function(inp) {
     const m = inp.match(contentRule);
     if (m && m[0]) {
-      console.log("content:" + m[0])
-      console.log("content:" + m[0].trim())
       return this.createToken('CONTENT', m[0])
     }
     return null
@@ -222,7 +230,8 @@ const ex2 = `
   }
 `
 
-// TODO: remove whitespace from content and tokens
+// TODO: remove whitespace from content and tokens...
+// TODO: fix order of tokens being eaten up lol
 const t = new Tokenizer()
 const tokens = t.tokenize(input)
 log("INPUT:")
