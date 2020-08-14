@@ -6,6 +6,7 @@ const log = (s) => console.log(s)
 Basic syntax
 Basic idea is that this a really easy syntax for creating DAGs
 
+CURRENT IMPLEMENTATION: 
 idea 1:
   {
     start {
@@ -45,56 +46,151 @@ and this is another with a reference to [[so this is one node]]
 */
 
 const NODE_DELIMETERS = {
-  OPEN_BRACKET: '{',
-  CLOSE_BRACK: '}',
+  NODE_OPEN: '{',
+  NODE_CLOSE: '}',
 }
 
 const MULTILINE_DELIMETERS = {
-  OPEN_PAREN: '(',
-  CLOSE_PAREN: ')',
+  MULTILINE_OPEN: '(',
+  MULTILINE_CLOSE: ')',
 }
 
 const LINK_DELIMETERS = {
-  OPEN_LINK: '[[',
-  CLOSE_LINK: ']]',
+  LINK_OPEN: '[[',
+  LINK_CLOSE: ']]',
 }
 
 const NEW_LINE = '\n'
 
-const DELIMETERS = {
+const ALL_DELIMETERS = {
   ...NODE_DELIMETERS,
   ...MULTILINE_DELIMETERS,
   ...LINK_DELIMETERS,
   NEW_LINE
 }
 
-const contentRule = VerEx().anythingBut([Object.values(DELIMETERS)])
+function Tokenizer(){
 
-function tokenize(input){
-  function consumeContent(){
+  // Delimeters
+  const { NODE_OPEN, NODE_CLOSE } = NODE_DELIMETERS
+  const { LINK_OPEN, LINK_CLOSE } = LINK_DELIMETERS
+  const { MULTILINE_OPEN, MULTILINE_CLOSE } = MULTILINE_DELIMETERS
+
+  // Regex rules
+  const contentRule = VerEx().anythingBut([Object.values(ALL_DELIMETERS)]).source
+  const nodeOpenRule = VerEx().find(NODE_OPEN).source
+  const nodeCloseRule = VerEx().find(NODE_CLOSE).source
+  const linkOpenRule = VerEx().find(LINK_OPEN).source
+  const linkCloseRule = VerEx().find(LINK_CLOSE).source
+  const multilineOpenRule = VerEx().find(MULTILINE_OPEN).source
+  const multilineCloseRule = VerEx().find(MULTILINE_CLOSE).source
+  const newLineRule = VerEx().find(NEW_LINE).source
+
+  this.tokenize = function(input) {
+    let stream = input
+    let tokens = []
+    while(stream.length) {
+      const checked = this.checkContent(stream)
+      || this.checkNodeOpen(stream)
+      || this.checkNodeClose(stream)
+      || this.checkLinkOpen(stream)
+      || this.checkLinkClose(stream)
+      || this.checkMultilineOpen(stream)
+      || this.checkMultilineClose(stream)
+      || this.checkNewLine(stream)
+
+      if(!checked) {
+        console.error('u fucked up')
+        return
+      }
+      tokens.push(checked)
+      console.log(checked)
+      console.log(checked.length)
+      stream = stream.slice(checked.lexeme.length);
+    }
+    return tokens;
   }
-  function consumeNode(){}
-  function consumeLink(){}
 
+  // REGEX MATCHERS
   // once you split up into tokens, the lexer attaches metadata to each token
   // lexeme is the actual content
-  // type is the indentifier used in the. AST
-  function createToken(type, lexeme){
-    return { type, lexeme }
+  // type is the indentifier used in the AST
+
+  // CONTENT
+  this.checkContent = function(inp) {
+    const m = inp.match(contentRule);
+    if (m && m[0]) {
+      return this.createToken('CONTENT', m[0])
+    }
+    return null
+  }
+  // NODES
+  this.checkNodeOpen = function(inp){
+    const m = inp.match(nodeOpenRule);
+    console.log(m)
+    if (m && m[0]) {
+      return this.createToken('NODE_OPEN', m[0])
+    }
+    return null
+  }
+  this.checkNodeClose = function (inp){
+    const m = inp.match(nodeCloseRule);
+    if (m && m[0]) {
+      return this.createToken('NODE_CLOSE', m[0])
+    }
+    return null
+  }
+  // LINKS
+  this.checkLinkOpen = function(inp){
+    const m = inp.match(linkOpenRule);
+    if (m && m[0]) {
+      return this.createToken('LINK_OPEN', m[0])
+    }
+    return null
+  }
+  this.checkLinkClose = function(inp){
+    const m = inp.match(linkCloseRule);
+    if (m && m[0]) {
+      return this.createToken('LINK_CLOSE', m[0])
+    }
+    return null
   }
 
-  // algorithm
-  // while you still have characters to read
-  // check all regex matches for most relevant node type
+  // MULTILINES
+  this.checkMultilineOpen = function(inp){
+    const m = inp.match(multilineOpenRule);
+    if (m && m[0]) {
+      return this.createToken('MULTILINE_OPEN', m[0])
+    }
+    return null
+  }
+  this.checkMultilineClose = function(inp){
+    const m = inp.match(multilineCloseRule);
+    if (m && m[0]) {
+      return this.createToken('MULTILINE_CLOSE', m[0])
+    }
+    return null
+  }
+  // New line
+  this.checkNewLine = function(inp){
+    const m = inp.match(newLineRule);
+    if (m && m[0]) {
+      return this.createToken('NEW_LINE', m[0])
+    }
+    return null
+  }
 
-  return []
+  // UTILITY FOR CREATING TOKEN OBJECTS
+  this.createToken = function(type, lexeme){
+    return { type, lexeme }
+  }
 }
 
 // the parser takes your tokens and creates an AST
-function parse(tokens){}
+function Parser(tokens){}
 
 // transpile to various output styles
-function transpiler(tree){
+function Transpiler(tree){
   this.toDOT = function(){}
   this.toUML = function(){}
 }
