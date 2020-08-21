@@ -1,286 +1,100 @@
-const VerEx = require('verbal-expressions');
-// https://verbalexpressions.github.io/JSVerbalExpressions/
+const peg = require("pegjs")
 const log = (s) => console.log(s)
 
+// https://pegjs.org/documentation
 /*
-Basic syntax
-Basic idea is that this a really easy syntax for creating DAGs
+Let's get organized!
+What's here?
 
-CURRENT IMPLEMENTATION: 
-idea 1:
-  {
-    start {
-      the first step is this {
-        then here's the second node {
-          but if you fail you go back to [[start]]
-        }
-        here's an example where the nodes are linked back {
-          by linking to [[]]
-        }
-      }
-      (this node is in paralell to first step.
-      you can view it as another option. it's multiline so you wrap it in parentheses)
-  }
+You have nodes, and you have edges. It's a graph. But you write it like prose, and it's highly structured.
 
-idea 2:
-  start > 
-    the first step is this >
-      then here's the second node >
-        but if you fail go back to [[start]]
-        otherwise continue to [[here]]
-        here >
-          this is the next step in process
-          this step is bidirectional <>
-            as you can see by the double brackets "<>"
-  }
+The goal of dagger is to build DAGs (directed acyclic graphs) in an intuitive way that resembels how designers typically build and think about user flows. It lets you write with whitespace, nest things in hierarchies, and reference specific parts of flows really easily.
+
+This library comes with a parser (which exports the AST), a transpiler (which converts the AST into either DOT or UML), and a renderer (which takes the AST and has an opinonated set of SVG objects and / or React components that will let you create interactive graphs).
+
+While this is optimized for brainstorming quickly, it can also just be used as a base for mindmapping tools in general and runs wherever JavaScript runs.
 
 
-so, you only have three types of tokens
+- NODES are any piece of text
+  - Nodes can be referenced by their full name
+  - Their children can be accessed through dot notation.
+  - In the future, you'll be able to give aliases to nodes, and access them through array indices
 
-NODE = {} represented by. either a content node with a new line, or a content node with brackets after it
-CONTENT = any string of alphanumeric characters including whitespace (but excluding new lines). Used as the label for each node
-LINK = [[]] a link uses wikilink syntax to indicate a connection to another node.
+- EDGES are arrows between pieces of text.
+  - Edges can also contain LABELS.
 
-so this is one node
-and this is another with a reference to [[so this is one node]]
+
+All text around arrows are nodes.
+If you want to label an edge, you wrap it in parentheses.
 */
 
-const NODE_DELIMETERS = {
-  NODE_OPEN: '{',
-  NODE_CLOSE: '}',
-}
+// This grammar 
+const daggerGrammer = `
+  start = Graph
 
-const MULTILINE_DELIMETERS = {
-  MULTILINE_OPEN: '(',
-  MULTILINE_CLOSE: ')',
-}
-
-const LINK_DELIMETERS = {
-  LINK_OPEN: '[[',
-  LINK_CLOSE: ']]',
-}
-
-const NEW_LINE = '\n'
-
-const ALL_DELIMETERS = {
-  ...NODE_DELIMETERS,
-  ...MULTILINE_DELIMETERS,
-  ...LINK_DELIMETERS,
-  NEW_LINE
-}
-
-function Tokenizer() {
-
-  // Delimeters
-  const { NODE_OPEN, NODE_CLOSE } = NODE_DELIMETERS
-  const { LINK_OPEN, LINK_CLOSE } = LINK_DELIMETERS
-  const { MULTILINE_OPEN, MULTILINE_CLOSE } = MULTILINE_DELIMETERS
-
-  // Regex rules
-  const contentRule = VerEx().anythingBut([Object.values(ALL_DELIMETERS)]).source
-  const nodeOpenRule = VerEx().find(NODE_OPEN).source
-  const nodeCloseRule = VerEx().find(NODE_CLOSE).source
-  const linkOpenRule = VerEx().find(LINK_OPEN).source
-  const linkCloseRule = VerEx().find(LINK_CLOSE).source
-  const multilineOpenRule = VerEx().find(MULTILINE_OPEN).source
-  const multilineCloseRule = VerEx().find(MULTILINE_CLOSE).source
-  const newLineRule = VerEx().find(NEW_LINE).source
-
-  this.tokenize = function(input) {
-    let stream = input
-    let tokens = []
-    while(stream.length) {
-      const checked = this.checkContent(stream)
-      || this.checkNodeOpen(stream)
-      || this.checkNodeClose(stream)
-      || this.checkLinkOpen(stream)
-      || this.checkLinkClose(stream)
-      || this.checkMultilineOpen(stream)
-      || this.checkMultilineClose(stream)
-      || this.checkNewLine(stream)
-
-
-      if(!checked) {
-        console.error('u fucked SYNTAX ERROR up')
-        return
-      }
-      
-      // Only push the trimmed version of the lexeme, but keep it in the original to continue parsing correctly
-      // const formattedToken = {
-      //   type: checked.type,
-      //   lexeme: checked.lexeme.trim()
-      // };
-
-      // if(formattedToken.lexeme.length > 0) {
-      //   // Only add non-0 length tokens
-      // }
-      console.log(checked.lexeme)
-      tokens.push(checked)
-      stream = stream.slice(checked.lexeme.length);
-    }
-    return tokens;
-  }
-
-  // REGEX MATCHERS
-  // once you split up into tokens, the lexer attaches metadata to each token
-  // lexeme is the actual content
-  // type is the indentifier used in the AST
-
-  // CONTENT
-  this.checkContent = function(inp) {
-    const m = inp.match(contentRule);
-    if (m && m[0]) {
-      return this.createToken('CONTENT', m[0])
-    }
-    return null
-  }
-  // NODES
-  this.checkNodeOpen = function(inp){
-    const m = inp.match(nodeOpenRule);
-    if (m && m[0]) {
-      return this.createToken('NODE_OPEN', m[0])
-    }
-    return null
-  }
-  this.checkNodeClose = function (inp){
-    const m = inp.match(nodeCloseRule);
-    if (m && m[0]) {
-      return this.createToken('NODE_CLOSE', m[0])
-    }
-    return null
-  }
-  // LINKS
-  this.checkLinkOpen = function(inp){
-    const m = inp.match(linkOpenRule);
-    if (m && m[0]) {
-      return this.createToken('LINK_OPEN', m[0])
-    }
-    return null
-  }
-  this.checkLinkClose = function(inp){
-    const m = inp.match(linkCloseRule);
-    if (m && m[0]) {
-      return this.createToken('LINK_CLOSE', m[0])
-    }
-    return null
-  }
-
-  // MULTILINES
-  this.checkMultilineOpen = function(inp){
-    const m = inp.match(multilineOpenRule);
-    if (m && m[0]) {
-      return this.createToken('MULTILINE_OPEN', m[0])
-    }
-    return null
-  }
-  this.checkMultilineClose = function(inp){
-    const m = inp.match(multilineCloseRule);
-    if (m && m[0]) {
-      return this.createToken('MULTILINE_CLOSE', m[0])
-    }
-    return null
-  }
-  // New line
-  this.checkNewLine = function(inp){
-    const m = inp.match(newLineRule);
-    if (m && m[0]) {
-      return this.createToken('NEW_LINE', m[0])
-    }
-    return null
-  }
-
-  // UTILITY FOR CREATING TOKEN OBJECTS
-  this.createToken = function(type, lexeme){
-    return { type, lexeme }
-  }
-}
-
-// the parser takes your tokens and creates an AST
-function Parser(tokens){}
-
-// transpile to various output styles
-function Transpiler(tree){
-  // DOT graph description language
-  this.toDOT = function(){}
-  // UML diagram
-  this.toUML = function(){}
-  // transforms this into an executable CLUI tree with autocomplete.
-  this.toCLUI = function(){}
-}
-
-//  testing
-const input = `
- {
-    start {
-      the first step is this {
-        then here's the second node {
-          but if you fail you go back to [[start]]
-        }
-        here's an example where the nodes are linked back {
-          by linking to [[start]]
-        }
-      }
-      (this node is in paralell to first step.
-      you can view it as another option. it's multiline so you wrap it in parentheses)
-  }
-`
-
-const ex2 = `
-  starting node {
-    child node {
-      another child node {
-        here's a link back to [[starting node]]
-      }
-    }
-  }
-`
-
-// TODO: remove whitespace from content and tokens...
-// TODO: fix order of tokens being eaten up lol
-const t = new Tokenizer()
-const tokens = t.tokenize(input)
-log("\nTOKENS:")
-log(tokens)
-log("INPUT:")
-log(input)
-
-/*
-
-// arrows are links between nodes
-// nodes are simply text
-// parallel branches are contained in curly braces
-// you can use wikilink syntax to link notes together
-// transpiles to DOT or UML 
-starting node -> child node -> another child -> link back to [[starting node]]
-
-start {
-  branch 1  -> step 1 -> step 2 -> step 3 {
-    branch 1.3 -> go back to [[start]]
+  // Finally build the graph
+  // This is where the magic happens!
+  Graph "graph" = allPairs:(_ Node _ Edge*)*  {    
+      return allPairs
+                  // Flatten out all the edges
+              .map(pair => pair.flat())
+              // Then flatten out all the combos
+              .flat()
+                      // Then remove the white space
+                      .filter(n => n !== " ")
   } 
-  branch 2 -> step 1 -> step 2 -> step 3
-} 
 
-im dependent on this! <-> and im dependent on that! 
+  // TODO: Branch
+  Edge = edge:(LabeledEdge / UnlabeledEdge) {
+    return edge
+  }
 
-if i do this {
-  go [[here]]
-  otherwise go [[there]]
-}
-here -> do this next 
-there -> do this next
+  // Edges
+  // Labeled edges wrap arrows in parens and let you write text
+  LabeledEdge = content:"("label:Node edge:UnlabeledEdge")" {
+    return {
+        type: "edge",
+          kind: edge.kind,
+          label: label.content
+      }
+  }
 
+  UnlabeledEdge "edge" = edge:(BiEdge/ForwardEdge/BackwardEdge) {
+    return edge 
+  }
 
-// ideal UX here:
+  BiEdge "bidirectional edge" = content:"<->" {
+    return { type: "edge", kind: "bi", content } 
+  }
 
+  ForwardEdge "forward edge" = content:"->" {
+    return { type: "edge", kind: "forward", content } 
+  }
 
-write it in a "repl" type environment with auto complete
+  BackwardEdge "backward edge" = content:"<-" {
+    return { type: "backward", kind: "backward", content } 
+  }
 
+  Node "node" = content:(Word InterwordWs)+ {
+    return {
+        type: "node",
+        content: content.map(c => c[0] + c[1]).join('').trim()
+      }
+  }
 
+  // One level up
+  InterwordWs = ws:_ {
+    return ws.join("")
+  }
 
-thoughts... if you want to structure your data, you can place it into parentheses
-(title: here, label: this is where u need to go.)
-// more ideas:
-then you can refference the wikilinks like [[ title='here' and label contains 'u' ]]
-// kinda like roam
+  // Basics
+  Word "word" = letters:letter+ {
+    return letters.join("")
+  }
 
-*/
+  letter "letter" = [A-Za-z0-9]
+
+  _ "whitespace" = [ \\t\\n\\r]*
+`
+
+const daggerParser = peg.generate(daggerGrammer);
