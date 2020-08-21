@@ -35,23 +35,7 @@ start = Graph
 
 // Finally build the graph
 // This is where the magic happens!
-Graph "graph" = allUnits:NodeEdgeUnit*  {    
-    /*const allNodes = allPairs.flat()
-    const nodes = allNodes.filter(n => n.type === 'node')
-    const edges = allNodes.filter(n => n.type === 'edge')
-    const list = {}
-    //console.log(nodes)
-    //console.log(edges)
-    // calculate parents
-    allPairs.forEach(pair => {
-    	console.log(pair)
-    })*/
-    //
-    
-    // basically want to look ahead
-    //for(let i = 0; i < allUnits.length; i++) {
-    //}
-    
+Graph "graph" = allUnits: (NodeEdgeUnit* (Branch*)) {        
     allUnits.forEach(unit => {
     	if(unit.length > 1) {
         	// found a pair
@@ -64,12 +48,15 @@ Graph "graph" = allUnits:NodeEdgeUnit*  {
     return allUnits
  } 
 
+// Allows hierarchies
+Branch = branch: ("{"_ ((NodeEdgeUnit+)','*)* _"}") {
+	return branch
+}
+
 NodeEdgeUnit "unit" = unit:(_ Node _ Edge*) {
 	return unit.flat().filter(n => n !== " " && n !== '\\n')
 }
 
-
-// TODO: Branch
 Edge = edge:(LabeledEdge / UnlabeledEdge) {
   return edge
 }
