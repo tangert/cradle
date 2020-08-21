@@ -27,79 +27,104 @@ While this is optimized for brainstorming quickly, it can also just be used as a
 All text around arrows are nodes.
 If you want to label an edge, you wrap it in parentheses.
 */
+// https://pegjs.org/online
 
 // This grammar 
 const daggerGrammer = `
-  start = Graph
+start = Graph
 
-  // Finally build the graph
-  // This is where the magic happens!
-  Graph "graph" = allPairs:(_ Node _ Edge*)*  {    
-      return allPairs
-                  // Flatten out all the edges
-              .map(pair => pair.flat())
-              // Then flatten out all the combos
-              .flat()
-                      // Then remove the white space
-                      .filter(n => n !== " " && n !== '\\n')
-  } 
+// Finally build the graph
+// This is where the magic happens!
+Graph "graph" = allUnits:NodeEdgeUnit*  {    
+    /*const allNodes = allPairs.flat()
+    const nodes = allNodes.filter(n => n.type === 'node')
+    const edges = allNodes.filter(n => n.type === 'edge')
+    const list = {}
+    //console.log(nodes)
+    //console.log(edges)
+    // calculate parents
+    allPairs.forEach(pair => {
+    	console.log(pair)
+    })*/
+    //
+    
+    // basically want to look ahead
+    //for(let i = 0; i < allUnits.length; i++) {
+    //}
+    
+    allUnits.forEach(unit => {
+    	if(unit.length > 1) {
+        	// found a pair
+            console.log(unit[0].content + unit[1].content)
+        } else {
+        	// terminating on
+            console.log('terminate on:' + unit[0].content)
+        }
+    })
+    return allUnits
+ } 
 
-  // TODO: Branch
-  Edge = edge:(LabeledEdge / UnlabeledEdge) {
-    return edge
-  }
+NodeEdgeUnit "unit" = unit:(_ Node _ Edge*) {
+	return unit.flat().filter(n => n !== " " && n !== '\\n')
+}
 
-  // Edges
-  // Labeled edges wrap arrows in parens and let you write text
-  LabeledEdge = content:"("label:Node edge:UnlabeledEdge")" {
-    return {
-        type: "edge",
-          kind: edge.kind,
-          label: label.content
-      }
-  }
 
-  UnlabeledEdge "edge" = edge:(BiEdge/ForwardEdge/BackwardEdge) {
-    return edge 
-  }
+// TODO: Branch
+Edge = edge:(LabeledEdge / UnlabeledEdge) {
+  return edge
+}
 
-  BiEdge "bidirectional edge" = content:"<->" {
-    return { type: "edge", kind: "bi", content } 
-  }
+// Edges
+// Labeled edges wrap arrows in parens and let you write text
+LabeledEdge = content:"("label:Node edge:UnlabeledEdge")" {
+  return {
+      type: "edge",
+        kind: edge.kind,
+        label: label.content
+    }
+}
 
-  ForwardEdge "forward edge" = content:"->" {
-    return { type: "edge", kind: "forward", content } 
-  }
+UnlabeledEdge "edge" = edge:(BiEdge/ForwardEdge/BackwardEdge) {
+  return edge 
+}
 
-  BackwardEdge "backward edge" = content:"<-" {
-    return { type: "backward", kind: "backward", content } 
-  }
+BiEdge "bidirectional edge" = content:"<->" {
+  return { type: "edge", kind: "bi", content } 
+}
 
-  Node "node" = content:(Word InterwordWs)+ {
-    return {
-        type: "node",
-        content: content.map(c => c[0] + c[1]).join('').trim()
-      }
-  }
+ForwardEdge "forward edge" = content:"->" {
+  return { type: "edge", kind: "forward", content } 
+}
 
-  // One level up
-  InterwordWs = ws:_ {
-    return ws.join("")
-  }
+BackwardEdge "backward edge" = content:"<-" {
+  return { type: "backward", kind: "backward", content } 
+}
 
-  // Basics
-  Word "word" = letters:letter+ {
-    return letters.join("")
-  }
+Node "node" = content:(Word InterwordWs)+ {
+  return {
+      type: "node",
+      content: content.map(c => c[0] + c[1]).join('').trim()
+    }
+}
 
-  letter "letter" = [A-Za-z0-9]
+// One level up
+InterwordWs = ws:_ {
+  return ws.join("")
+}
 
-  _ "whitespace" = [ \\t\\n\\r]*
+// Basics
+Word "word" = letters:letter+ {
+  return letters.join("")
+}
+
+letter "letter" = [A-Za-z0-9]
+
+_ "whitespace" = [ \\t\\n\\r]*
 `
 
 const daggerParser = peg.generate(daggerGrammer);
 const sampleInput = `
-  step 1 -> step 2 (on click ->) step 3
+  step 1 -> step 2 (on ->) step 3
 `
 log("input: " + sampleInput)
 log(daggerParser.parse(sampleInput))
