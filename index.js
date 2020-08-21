@@ -41,7 +41,7 @@ const daggerGrammer = `
               // Then flatten out all the combos
               .flat()
                       // Then remove the white space
-                      .filter(n => n !== " ")
+                      .filter(n => n !== " " && n !== '\\n')
   } 
 
   // TODO: Branch
@@ -98,3 +98,8 @@ const daggerGrammer = `
 `
 
 const daggerParser = peg.generate(daggerGrammer);
+const sampleInput = `
+  step 1 -> step 2 (on click ->) step 3
+`
+log("input: " + sampleInput)
+log(daggerParser.parse(sampleInput))
