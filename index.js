@@ -30,48 +30,59 @@ If you want to label an edge, you wrap it in parentheses.
 // https://pegjs.org/online
 
 // This grammar 
+// TODO: figure out how to get nested things working
 const daggerGrammer = `
 start = Graph
 
 // Finally build the graph
 // This is where the magic happens!
-Graph "graph" = allUnits: (NodeEdgeUnit* (Branch*)) {        
-    allUnits.forEach(unit => {
-    	if(unit.length > 1) {
-        	// found a pair
-            console.log(unit[0].content + unit[1].content)
-        } else {
-        	// terminating on
-            console.log('terminate on:' + unit[0].content)
-        }
-    })
+Graph "graph" = allUnits: (NodeEdgeUnitList / Branch)* {
     return allUnits
  } 
 
-// Allows hierarchies
-Branch = branch: ("{"_ ((NodeEdgeUnit+)','*)* _"}") {
-	return branch
+Branch "branch" = branch: ((Node)?(_ BranchOpener _(Branch / NodeEdgeUnitList)+_ BranchCloser)) {
+	return {
+    	type: "branch",
+        content: branch
+    }
+}
+
+// Either seprate them by commas or just have a regular unit
+NodeEdgeUnitList = ((NodeEdgeUnit+",")* (NodeEdgeUnit+_))
+
+BranchOpener = char: "{" {
+	return {
+    	type: "branchOpener",
+        content: char
+    }
+}
+
+BranchCloser = char: "}" {
+	return {
+    	type: "branchCloser",
+        content: char
+    }
 }
 
 NodeEdgeUnit "unit" = unit:(_ Node _ Edge*) {
-	return unit.flat().filter(n => n !== " " && n !== '\\n')
+	return unit.flat().filter(n => n.type !== 'whitespace')
 }
 
-Edge = edge:(LabeledEdge / UnlabeledEdge) {
+Edge "edge" = edge:(LabeledEdge / UnlabeledEdge) {
   return edge
 }
 
 // Edges
 // Labeled edges wrap arrows in parens and let you write text
-LabeledEdge = content:"("label:Node edge:UnlabeledEdge")" {
+LabeledEdge "labeled edge" = content:"("label:Node edge:UnlabeledEdge")" {
   return {
-      type: "edge",
+        type: "edge",
         kind: edge.kind,
         label: label.content
     }
 }
 
-UnlabeledEdge "edge" = edge:(BiEdge/ForwardEdge/BackwardEdge) {
+UnlabeledEdge "unlabeled edge" = edge:(BiEdge/ForwardEdge/BackwardEdge) {
   return edge 
 }
 
@@ -95,8 +106,8 @@ Node "node" = content:(Word InterwordWs)+ {
 }
 
 // One level up
-InterwordWs = ws:_ {
-  return ws.join("")
+InterwordWs "interword whitiespace" = ws:_ {
+  return ws.content.join("")
 }
 
 // Basics
@@ -106,12 +117,19 @@ Word "word" = letters:letter+ {
 
 letter "letter" = [A-Za-z0-9]
 
-_ "whitespace" = [ \\t\\n\\r]*
+// We return an object so we can easily filter
+_ "whitespace" = content: [ \\t\\n\\r]* {
+	return {
+    	type: "whitespace",
+        content
+    }
+}
 `
 
 const daggerParser = peg.generate(daggerGrammer);
 const sampleInput = `
   step 1 -> step 2 (on ->) step 3
 `
+
 log("input: " + sampleInput)
 log(daggerParser.parse(sampleInput))
