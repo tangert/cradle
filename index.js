@@ -144,12 +144,45 @@ _ "whitespace" = content: [ \\t\\n\\r]* {
 `
 
 const daggerParser = peg.generate(daggerGrammer);
+
 const sampleInput = `
   step 1 -> step 2 (on ->) step 3
 `
 
+// want to cover this syntax:
+// google -> oauth
+// github -> oauth
+// facebook -> oauth
+// { google, github, facebook } -> oauth
+// basically a "reverse tree"
+// { google, github, facebook } -> { tech companies, employers, public}
+
+// need to cover naked transitions
+
+const userFlow = `
+  sign up {
+    if you're already signed up -> login,
+    else {
+      sign up with {
+        google -> oauth
+        github -> oauth
+        facebook -> oauth
+        email
+      }
+    }
+  }
+  login {
+    choose provider {
+      google
+      github
+      facebook
+      email -> enter in email and password
+    }
+  }
+`
 log("input: " + sampleInput)
-const { ast } = daggerParser.parse(sampleInput)
-log(ast)
+const { sampleAST } = daggerParser.parse(sampleInput)
+const { userFlowAST } = daggerParser.parse(userFlow)
+
 // cool, now you have the AST!
 // now you can create a walking functioin like anything else
