@@ -149,4 +149,4 @@ const sampleInput = `
 `
 
 log("input: " + sampleInput)
-log(daggerParser.parse(sampleInput))
+const { ast } = daggerParser.parse(sampleInput)
