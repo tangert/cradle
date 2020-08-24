@@ -42,11 +42,11 @@ Graph "graph" = allUnits: (NodeEdgeUnitList / Branch)* {
     }
  } 
 
-Branch "branch" = content: ((Node)?(_ BranchOpener _(Branch / NodeEdgeUnitList)+_ BranchCloser)) {
+Branch "branch" = children: ((Node)?(_ BranchOpener _(Branch / NodeEdgeUnitList)+_ BranchCloser)) {
 	return {
     	type: "branch",
         // the first flat removes any whitespace or unneeded stuff from the filter
-        content: content.flat()
+        children: children.flat()
                         .filter(c => c && c.type !== 'whitespace' && c.type !== 'branch')
                         // the second flat turns all of the sequences into one lisit
                         .flat()
@@ -54,10 +54,10 @@ Branch "branch" = content: ((Node)?(_ BranchOpener _(Branch / NodeEdgeUnitList)+
 }
 
 // Either seprate them by commas or just have a regular unit
-NodeEdgeUnitList = content:((NodeEdgeUnit+",")* (NodeEdgeUnit+_)) {
+NodeEdgeUnitList = children:((NodeEdgeUnit+",")* (NodeEdgeUnit+_)) {
 	return {
     	type: "nodeEdgeUnitList",
-        content: content.flat().filter(c => c.type !== 'whitespace')
+        children: children.flat().filter(c => c.type !== 'whitespace')
     }
 }
 
@@ -80,7 +80,7 @@ BranchCloser = char: "}" {
 NodeEdgeUnit "unit" = unit:(_ Node _ Edge*) {
 	return {
     	type: 'nodeEdgeUnit',
-    	content: unit.flat().filter(n => n.type !== 'whitespace')
+    	children: unit.flat().filter(n => n.type !== 'whitespace')
     }
 }
 
@@ -150,3 +150,6 @@ const sampleInput = `
 
 log("input: " + sampleInput)
 const { ast } = daggerParser.parse(sampleInput)
+log(ast)
+// cool, now you have the AST!
+// now you can create a walking functioin like anything else
