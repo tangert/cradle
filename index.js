@@ -1,20 +1,8 @@
 const peg = require("pegjs")
 const log = (s) => console.log(s)
 
-// https://pegjs.org/documentation
+
 /*
-Let's get organized!
-What's here?
-
-You have nodes, and you have edges. It's a graph. But you write it like prose, and it's highly structured.
-
-The goal of dagger is to build DAGs (directed acyclic graphs) in an intuitive way that resembels how designers typically build and think about user flows. It lets you write with whitespace, nest things in hierarchies, and reference specific parts of flows really easily.
-
-This library comes with a parser (which exports the AST), a transpiler (which converts the AST into either DOT or UML), and a renderer (which takes the AST and has an opinonated set of SVG objects and / or React components that will let you create interactive graphs).
-
-While this is optimized for brainstorming quickly, it can also just be used as a base for mindmapping tools in general and runs wherever JavaScript runs.
-
-
 - NODES are any piece of text
   - Nodes can be referenced by their full name
   - Their children can be accessed through dot notation.
@@ -23,14 +11,14 @@ While this is optimized for brainstorming quickly, it can also just be used as a
 - EDGES are arrows between pieces of text.
   - Edges can also contain LABELS.
 
-
 All text around arrows are nodes.
 If you want to label an edge, you wrap it in parentheses.
 */
-// https://pegjs.org/online
 
+// https://pegjs.org/online
+// https://pegjs.org/documentation
 // This grammar 
-// TODO: figure out how to get nested things working
+// TODO: figure out how to get nested LISTS of branches working 
 const daggerGrammer = `
 start = Graph
 
@@ -38,16 +26,16 @@ start = Graph
 // Finally build the graph
 // This is where the magic happens!
 
-Graph "graph" = children: (Sequence / Branch)* {
+Graph "graph" = children: (Sequence / Group)* {
     return {
     	ast: children
     }
  } 
 
 // ONCE AGAIN THE PROBLEM IS NESTED BRANCHES
-Branch "branch" = children: (Node?(_ BranchOpener (Branch / Sequence ","*)+ BranchCloser _)+) {
-	return {
-    	type: "branch",
+Group "group" = children: (Node?(_ GroupOpener (Group / Sequence ","*)+ GroupCloser _)+) {
+	  return {
+    	  type: "group",
         // the first flat removes any whitespace or unneeded stuff from the filter
         children: children.flat()
                         .filter(c => c && c.type !== 'whitespace' && c.type !== 'branch')
@@ -66,19 +54,19 @@ Sequence "sequence"  = children:((NodeEdgeUnit+",")* (NodeEdgeUnit+_)_) {
     }
 }
 
-BranchOpener = char: "{" {
+GroupOpener = char: "{" {
 	return {
-    	type: "branch",
-        kind: "opener",
-        content: char
+    	type: "group",
+      kind: "opener",
+      content: char
     }
 }
 
-BranchCloser = char: "}" {
+GroupCloser = char: "}" {
 	return {
-    	type: "branch",
-        kind: "closer",
-        content: char
+    	type: "group",
+      kind: "closer",
+      content: char
     }
 }
 
@@ -104,11 +92,11 @@ LabeledEdge "labeled edge" = content:"("label:Node edge:UnlabeledEdge")" {
     }
 }
 
-UnlabeledEdge "unlabeled edge" = edge:(BiEdge/ForwardEdge/BackwardEdge) {
+UnlabeledEdge "unlabeled edge" = edge:(BidirectionalEdge/ForwardEdge/BackwardEdge) {
   return edge 
 }
 
-BiEdge "bidirectional edge" = content:"<->" {
+BidirectionalEdge "bidirectional edge" = content:"<->" {
   return { type: "edge", kind: "bi", content } 
 }
 
@@ -143,7 +131,7 @@ letter "letter" = [A-Za-z0-9]
 _ "whitespace" = content: [ \\t\\n\\r]* {
 	return {
     	type: "whitespace",
-        content
+      content
     }
 }`
 
@@ -160,7 +148,7 @@ const sampleInput = `step 1 -> step 2 (on ->) step 3`
 // { google, github, facebook } -> { tech companies, employers, public}
 // need to cover naked transitions
 
-const userFlow = `
+const signupFlows = `
 root {  
   sign up {
     if youre already signed up -> login,
@@ -183,11 +171,48 @@ root {
   }
 }`
 
+
+// support for wikilink syntax
+
+const submissionFlow = `
+root {
+  in workspace (press submit ->) submission modal
+  outside workspace {
+    in my repls {
+
+    }
+    on home {
+
+    }
+  }
+}
+`
+
 const test2 = `
 root {
-  1 { 2 },
-  3 { 4 }
+  1 {
+    a -> b -> c
+  },
+  2 {
+    a -> b -> c
+  }
 }`
+
+// how do you name flows ?
+
+const test3 = `
+graph {
+  a -> b,
+  c <-> d,
+  e (on click <->) f,
+  g {
+    if true {
+    },
+    otherwise {
+    }
+  }
+}
+`
 
 log("input: " + sampleInput)
 const ast = daggerParser.parse(test2)
