@@ -1,23 +1,19 @@
 # What is Dagger?
 
-Dagger is a language for designing interactions, experiences, and flows. Interaction and UX design involve complex logic and structure, but our tools for "designing experiences" are often limited to drawing boxes manually in Figma/Sketch/Omnigraffle/whatever flavor of mind mapping or wireframing tool you use. Other solutions include using complex JavaScript libraries, learning DOT, or just using natural language. Dagger's intent is to try formalize experience and interaction design as code.
+Dagger is a language for designing interactions, experiences, and flows. Interaction and UX design involve complex logic and structure, but our tools for "designing experiences" are often limited to drawing boxes manually in Figma/Sketch/Omnigraffle/whatever flavor of mind mapping or wireframing tool you use, using complex JavaScript libraries, learning DOT (which is not intended for designs), or just using natural language. Dagger's intent is to try formalize experience and interaction design as code.
 
-It should be: 
+More specifically, Dagger is a DSL (domain specific language) for building DAGs (directed acyclic graphs) in an intuitive way that resembles natural language. It lets you write with whitespace, nest things in hierarchies, and create different kinds of links between nodes really easily. It's not "feature complete" or intended to be a complete replacement for DOT (especially its renderer), but that's not the point. It's supposed to be easy to use and get the job done. It is also not a new concept to think of UIs and UX with state machines and graphs. But the emphasis in Dagger here is on syntax and ease of use. It should feel like writing, but just a little bit more structured.
+
+(link to prior art)
+
+Dagger is opinionated and takes the stance that design specs should be: 
 - Versionable
 - Portable - not stuck in any specific design program
 - Visualizable
 - Lintable
-- Testable
-
-More specifically, Dagger is a DSL (domain specific language) for building DAGs (directed acyclic graphs) in an intuitive way that resembles natural language. It lets you write with whitespace, nest things in hierarchies, and create different kinds of links between text really easily. It's not "feature complete" or intended to be a complete replacement for DOT (especially its renderer), but that's not the point. It's supposed to be easy to use and get the job done.
-
-It is not a new concept to think of UIs and UX with state machines and graphs. However we either get bogged down trying to draw boxes and diagrams manually, or use existing graph description languages that don't match how we think about flows in natural language.
+- Testable - error handling is huge in UX! 
 
 # In progress
-***************
-ALL IN PROGRESS
-***************
-
 
 High priority:
 - A parser (which exports the AST)
