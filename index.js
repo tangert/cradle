@@ -34,29 +34,34 @@ If you want to label an edge, you wrap it in parentheses.
 const daggerGrammer = `
 start = Graph
 
+// BUG: the last node in teh sequence is getting iti's first letter cut off
 // Finally build the graph
 // This is where the magic happens!
-Graph "graph" = allUnits: (NodeEdgeUnitList / Branch)* {
+
+Graph "graph" = children: (Sequence / Branch)* {
     return {
-    	ast: allUnits
+    	ast: children
     }
  } 
 
-Branch "branch" = children: ((Node)?(_ BranchOpener _(Branch / NodeEdgeUnitList)+_ BranchCloser)) {
+// ONCE AGAIN THE PROBLEM IS NESTED BRANCHES
+Branch "branch" = children: (Node?(_ BranchOpener (Branch / Sequence ","*)+ BranchCloser _)+) {
 	return {
     	type: "branch",
         // the first flat removes any whitespace or unneeded stuff from the filter
         children: children.flat()
                         .filter(c => c && c.type !== 'whitespace' && c.type !== 'branch')
-                        // the second flat turns all of the sequences into one lisit
+                        // the second flat turns all of the sequences into one list
                         .flat()
     }
 }
 
 // Either seprate them by commas or just have a regular unit
-NodeEdgeUnitList = children:((NodeEdgeUnit+",")* (NodeEdgeUnit+_)) {
+Sequence "sequence"  = children:((NodeEdgeUnit+",")* (NodeEdgeUnit+_)_) {
 	return {
-    	type: "nodeEdgeUnitList",
+    	type: "sequence",
+        // should this be responsibile for combing the liist into  one thing?
+        // probably
         children: children.flat().filter(c => c.type !== 'whitespace')
     }
 }
@@ -80,7 +85,7 @@ BranchCloser = char: "}" {
 NodeEdgeUnit "unit" = unit:(_ Node _ Edge*) {
 	return {
     	type: 'nodeEdgeUnit',
-    	children: unit.flat().filter(n => n.type !== 'whitespace')
+    	children: unit.filter(n => n.type !== 'whitespace')
     }
 }
 
@@ -123,7 +128,7 @@ Node "node" = content:(Word InterwordWs)+ {
 }
 
 // One level up
-InterwordWs "interword whitiespace" = ws:_ {
+InterwordWs "interword whitespace" = ws:_ {
   return ws.content.join("")
 }
 
@@ -140,14 +145,11 @@ _ "whitespace" = content: [ \\t\\n\\r]* {
     	type: "whitespace",
         content
     }
-}
-`
+}`
 
 const daggerParser = peg.generate(daggerGrammer);
 
-const sampleInput = `
-  step 1 -> step 2 (on ->) step 3
-`
+const sampleInput = `step 1 -> step 2 (on ->) step 3`
 
 // want to cover this syntax:
 // google -> oauth
@@ -156,33 +158,40 @@ const sampleInput = `
 // { google, github, facebook } -> oauth
 // basically a "reverse tree"
 // { google, github, facebook } -> { tech companies, employers, public}
-
 // need to cover naked transitions
 
 const userFlow = `
+root {  
   sign up {
-    if you're already signed up -> login,
+    if youre already signed up -> login,
     else {
       sign up with {
-        google -> oauth
-        github -> oauth
-        facebook -> oauth
+        google -> oauth,
+        github -> oauth,
+        facebook -> oauth,
         email
       }
     }
-  }
+  },
   login {
     choose provider {
-      google
-      github
-      facebook
+      google,
+      github,
+      facebook,
       email -> enter in email and password
     }
   }
-`
-log("input: " + sampleInput)
-const { sampleAST } = daggerParser.parse(sampleInput)
-const { userFlowAST } = daggerParser.parse(userFlow)
+}`
 
+const test2 = `
+root {
+  1 { 2 },
+  3 { 4 }
+}`
+
+log("input: " + sampleInput)
+const ast = daggerParser.parse(test2)
+log(test2)
+log(ast)
 // cool, now you have the AST!
 // now you can create a walking functioin like anything else
