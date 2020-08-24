@@ -37,35 +37,51 @@ start = Graph
 // Finally build the graph
 // This is where the magic happens!
 Graph "graph" = allUnits: (NodeEdgeUnitList / Branch)* {
-    return allUnits
+    return {
+    	ast: allUnits
+    }
  } 
 
-Branch "branch" = branch: ((Node)?(_ BranchOpener _(Branch / NodeEdgeUnitList)+_ BranchCloser)) {
+Branch "branch" = content: ((Node)?(_ BranchOpener _(Branch / NodeEdgeUnitList)+_ BranchCloser)) {
 	return {
     	type: "branch",
-        content: branch
+        // the first flat removes any whitespace or unneeded stuff from the filter
+        content: content.flat()
+                        .filter(c => c && c.type !== 'whitespace' && c.type !== 'branch')
+                        // the second flat turns all of the sequences into one lisit
+                        .flat()
     }
 }
 
 // Either seprate them by commas or just have a regular unit
-NodeEdgeUnitList = ((NodeEdgeUnit+",")* (NodeEdgeUnit+_))
+NodeEdgeUnitList = content:((NodeEdgeUnit+",")* (NodeEdgeUnit+_)) {
+	return {
+    	type: "nodeEdgeUnitList",
+        content: content.flat().filter(c => c.type !== 'whitespace')
+    }
+}
 
 BranchOpener = char: "{" {
 	return {
-    	type: "branchOpener",
+    	type: "branch",
+        kind: "opener",
         content: char
     }
 }
 
 BranchCloser = char: "}" {
 	return {
-    	type: "branchCloser",
+    	type: "branch",
+        kind: "closer",
         content: char
     }
 }
 
 NodeEdgeUnit "unit" = unit:(_ Node _ Edge*) {
-	return unit.flat().filter(n => n.type !== 'whitespace')
+	return {
+    	type: 'nodeEdgeUnit',
+    	content: unit.flat().filter(n => n.type !== 'whitespace')
+    }
 }
 
 Edge "edge" = edge:(LabeledEdge / UnlabeledEdge) {
@@ -78,6 +94,7 @@ LabeledEdge "labeled edge" = content:"("label:Node edge:UnlabeledEdge")" {
   return {
         type: "edge",
         kind: edge.kind,
+        content: edge.content,
         label: label.content
     }
 }
