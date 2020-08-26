@@ -18,16 +18,33 @@ Dagger is opinionated and takes the stance that design specs should be:
 Your dagger spec is just text. It can either live as a text file you read, or as a string in code. Here are the basics of the syntax
 
 ### Syntax
+#### Nodes
+Nodes are just text. They're basically any alphanumeric character, and they represent the boxes you'd draw in a graph. You connect Nodes together with various kinds of arrows to form sequences.
+
 #### Sequences
 Sequences are the basic part of Dagger. Often when designing flows, we like to write things with arrows and events between them. For example:
 ```
 step 1 -> step 2 -> step 3
 ```
-If you wan to label transitions, simply wrap the arrow in parentheses and write some text before it.
+If you want to label transitions, simply wrap the arrow in parentheses and write some text before it.
 ```
 step 1 (transition label ->) step 2 -> step 3
 ```
-Let's say you're designing basic interactions for a web app, and you want to specify what happens when you click on a menu. You can define that like this:
+If you want to indicate directionality, just adjust the direction of the arrow.
+```
+// bidirectional
+step 1 <-> step 2
+```
+```
+// forward
+step 1 -> step 2
+```
+```
+// backward
+step 1 <- step 2
+
+```
+Let's get a practical example in here. If you're designing basic interactions for a web app, and you want to specify what happens when you click on a menu. You can define that like this:
 ```
 menu (on click ->) open popover
 ```
@@ -45,7 +62,7 @@ group {
 
   },
   subgroup2 {
-    
+
   }
 }
 ```
