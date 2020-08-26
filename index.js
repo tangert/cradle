@@ -8,6 +8,7 @@ const parser = peg.generate(grammar)
 
 const sampleInputs = [
   `step 1 -> step 2 (on ->) step 3`,
+
   `root { 1 -> 2, 3 -> 4, subgraph { 1 -> 2 }}`,
   `sign up flows {  
     sign up {
@@ -30,6 +31,7 @@ const sampleInputs = [
       }
     }
   }`,
+  
   `root {
     1 {
       a -> b -> c
@@ -38,7 +40,9 @@ const sampleInputs = [
       a -> b -> c
     }
   }`,
+
   `r{1{},2{3{}}}`,
+  
   `{}`,
 ]
 
