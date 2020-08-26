@@ -1,0 +1,8 @@
+user flows {
+  sign up {
+    get to landing page -> scroll down -> hit sign up bar,
+    go to anon page -> see save in right corner -> get sign up pop up
+  }
+  onboarding {}
+  log out {}
+}

@@ -10,6 +10,7 @@ const sampleInputs = [
   `step 1 -> step 2 (on ->) step 3`,
 
   `root { 1 -> 2, 3 -> 4, subgraph { 1 -> 2 }}`,
+  
   `sign up flows {  
     sign up {
       if youre already signed up -> login,
@@ -90,3 +91,9 @@ sampleInputs.forEach(inp => {
   walk(parsed.ast)
   log("\n")
 })
+
+const userFlows = fs.readFileSync("examples/userFlows.cradle", "utf8")
+const userFlowAST = parser.parse(userFlows)
+log(userFlows)
+log(userFlowAST)
+
