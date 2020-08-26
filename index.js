@@ -148,6 +148,7 @@ const buildGraph = (ast) => {
             if(!graph[last].includes(curr)) {
               graph[last].push(curr);
             }
+            break;
           default:
             return
         }
@@ -172,11 +173,11 @@ const cradleToDOT = (input) => {
   // create the DOT string
 }
 
-const g = buildGraph(parsedSequence.ast)
 
 log("original sequence: ")
 log(sequence)
 log("\nAST: ")
 log(parsedSequence.ast)
 log("\ngraph: ")
+const g = buildGraph(parsedSequence.ast)
 log(g)
