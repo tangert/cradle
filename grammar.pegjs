@@ -86,7 +86,7 @@ Edge "edge" = edge:(LabeledEdge / UnlabeledEdge) {
 LabeledEdge "labeled edge" = content:"("label:Node edge:UnlabeledEdge")" {
   return {
         type: "edge",
-        variant: edge.variant,
+        direction: edge.direction,
         content: edge.content,
         label: label.content
     }
@@ -98,15 +98,15 @@ UnlabeledEdge "unlabeled edge" = edge:(BiEdge/FEdge/BEdge) {
 }
 
 BiEdge "bidirectional edge" = content:"<->" {
-  return { type: "edge", variant: "bidirectional", content } 
+  return { type: "edge", direction: "bi", content } 
 }
 
 FEdge "forward edge" = content:"->" {
-  return { type: "edge", variant: "forward", content } 
+  return { type: "edge", direction: "forward", content } 
 }
 
 BEdge "backward edge" = content:"<-" {
-  return { type: "edge", variant: "backward", content } 
+  return { type: "edge", direction: "backward", content } 
 }
 
 /*******************
