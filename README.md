@@ -29,6 +29,20 @@ this is a node
 this is a node too and it includes spaces
 ```
 
+#### Edges
+Edges are arrows between nodes that link them together.
+
+There are three kinds: 
+- Forward `->`
+- Backward `<-`
+- Bidirectional `<->`
+
+If you want to add a label to an edge, wrap it in parentheses and write text before it.
+
+- `(on click ->)`
+- `(backwards baby <-)`
+- `(this goes both ways <->)`
+
 #### Sequences
 Sequences are the basic part of Cradle. Often when designing flows, we like to write things with arrows and events between them. For example:
 ```
@@ -38,18 +52,18 @@ If you want to label transitions, simply wrap the arrow in parentheses and write
 ```
 step 1 (transition label ->) step 2 -> step 3
 ```
-If you want to indicate directionality, just adjust the direction of the arrow.
+If you want to indicate directionality, just adjust the direction of the edge as indicated above.
 ```
 // bidirectional
-step 1 <-> step 2
+step 1 <-> step 2 <-> step 3
 ```
 ```
 // forward
-step 1 -> step 2
+step 1 -> step 2 -> step 3
 ```
 ```
 // backward
-step 1 <- step 2
+step 1 <- step 2 <- step 3
 
 ```
 Let's get a practical example in here. If you're designing basic interactions for a web app, and you want to specify what happens when you click on a menu. You can define that like this:

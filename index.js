@@ -10,7 +10,7 @@ const sampleInputs = [
   `step 1 -> step 2 (on ->) step 3`,
 
   `root { 1 -> 2, 3 -> 4, subgraph { 1 -> 2 }}`,
-  
+
   `sign up flows {  
     sign up {
       if youre already signed up -> login,
@@ -61,6 +61,9 @@ function walk(tree) {
   })
 }
 
+
+
+
 /*
 this creates an adjancency list from the ast
 {
@@ -97,3 +100,9 @@ const userFlowAST = parser.parse(userFlows)
 log(userFlows)
 log(userFlowAST)
 
+// String interpolation example
+const nodes = ['a', 'b', 'c', 'd', 'e']
+const sequence = `${nodes.slice(1).reduce((acc,curr, idx) => acc + '->' + curr, nodes[0])}`
+const parsedSequence = parser.parse(sequence)
+log(sequence)
+log(parsedSequence)
