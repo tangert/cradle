@@ -9,7 +9,7 @@ const parser = peg.generate(grammar)
 const sampleInputs = [
   `step 1 -> step 2 (on ->) step 3`,
   `root { 1 -> 2, 3 -> 4, subgraph { 1 -> 2 }}`,
-  `root {  
+  `sign up flows {  
     sign up {
       if youre already signed up -> login,
       else {
@@ -39,12 +39,31 @@ const sampleInputs = [
     }
   }`,
   `r{1{},2{3{}}}`,
+  `{}`,
 ]
 
-sampleInputs.forEach(inp => {
+
+function walk(tree) {
+  tree.forEach(child => {
+    if(child.type === 'group') {
+      log(child.start.content)
+    } else if (child.content) {
+      log(child.content)
+    }
+    if(child.children) {
+      walk(child.children)
+    }
+  })
+}
+
+sampleInputs.slice(1,3).forEach(inp => {
   const parsed = parser.parse(inp)
+  log("\n")
   log("INPUT:")
   log(inp)
   log("AST:")
   log(parsed)
+  log(parsed.ast.length)
+  walk(parsed.ast)
+  log("\n")
 })

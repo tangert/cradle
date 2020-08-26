@@ -14,7 +14,7 @@ start = Graph
 
 Graph "graph" = children: (Group / Sequence)+ {
     return {
-    	ast: children[0]
+    	ast: children
     }
  } 
 
