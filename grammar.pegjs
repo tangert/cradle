@@ -135,7 +135,7 @@ letter "letter" = [A-Za-z0-9]
 // We return an object so we can easily filter
 _ "whitespace" = content: [ \t\n\r]* {
 	return {
-    	type: "whitespace",
+      type: "whitespace",
       content
     }
 }

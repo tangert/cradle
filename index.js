@@ -95,21 +95,32 @@ function createObject(ast) {
 
 const userFlows = fs.readFileSync("examples/userFlows.cradle", "utf8")
 const userFlowAST = parser.parse(userFlows)
-// log(userFlows)
-// log(userFlowAST)
+log(userFlows)
+log(userFlowAST)
 
 
 // String interpolation example
 // const nodes = ['a', 'b', 'c', 'd', 'e', 'b', 'e', 'f', 'e']
 // const sequence = `${nodes.slice(1).reduce((acc,curr, idx) => acc + '->' + curr, nodes[0])}`
-const sequence = `a <-> b <-> c <-> d -> e -> f <- g`
+
+const sequence = `test group {
+  a <-> b <-> c <-> d -> e -> f <-> g,
+  cool <-> beans,
+  awesome -> dude,
+}`
+
 const parsedSequence = parser.parse(sequence)
 
 // TODO: handle groups.
 const buildGraph = (ast) => {
   let graph = {}
+  // To determine how to add edges into the list
   let lastNode;
   let lastEdge;
+  // To keep track if you're inside a group
+  let lastGroup;
+  let lastSequenceLength = 0;
+  let startOfSequence = false;
 
   // Walk over the nodes and build the graph.
   walk(ast, (child) => {
@@ -119,6 +130,16 @@ const buildGraph = (ast) => {
       if(!graph[child.content]) {
         graph[child.content] = []
       }
+
+      // TODO: handle adding subgroups
+      if(lastGroup && startOfSequence) {
+        // You found the start of a sequence inside of a group.
+        // Push the current one
+        // It's implied that a group is a forward edge...  figure out how to get around this
+        graph[lastGroup.start.content].push(child.content)
+        startOfSequence = false;
+      }
+
 
       if(lastEdge && lastNode) {
         // found a connection!
@@ -154,10 +175,40 @@ const buildGraph = (ast) => {
         }
       }
 
+      lastSequenceLength--;
+
+      // got to the end of a sequence
+      if(lastSequenceLength === 0) {
+        // once you reach the end of a sequence set the last node and edge to null so you have a fresh start
+        lastNode = null
+        lastEdge = null
+      } else {
+        lastNode = child
+      }
+    }
+    // keep a stack for last nodes...
+    else if (child.type === 'group') {
+
+      // Initialize
+      if(!graph[child.start.content]) {
+        graph[child.start.content] = []
+      }
+      // when you find a group, you want its starting node to be connected to the first node of each of its childre
+      // if it's a sequence, that means the first node in that sequence,
+      // if it's another group, that means that group's start
+
+      // each node needs to be aware of whether it is the start of a sequence and whether its inside a group.
+      // can you keep track of this with one variable?
+      lastGroup = child
       lastNode = child
+
+    }
+    else if (child.type === 'sequence') {
+      startOfSequence = true
+      lastSequenceLength = child.children.filter(c => c.type === 'node').length
     }
     // If you find an edge, store it to define how the next node you find gets added to the list
-    if(child.type === 'edge') {
+    else if(child.type === 'edge') {
       lastEdge = child
     }
   })
