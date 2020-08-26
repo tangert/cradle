@@ -114,7 +114,7 @@ menu interactions {
   - Can nodes have multiple names / references? If so, what's the easiest syntax to do that? 
   - Should everything be in a global namespace?
   - What if you could refer to nodes by their parents using dot notation or array indexing?
-  - `(user flow).(step 1)`, `(user flow).0`, `(user flow).first` could all refer to the same node
+  - `user flow.step 1`, `user flow.0`, `user flow.first` could all refer to the same node
 
 # In progress
 High priority:
