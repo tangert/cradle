@@ -32,7 +32,7 @@ this is a node too and it includes spaces
 #### Edges
 Edges are arrows between nodes that link them together.
 
-This is biased right now towards people who natively read/write LTR languages (because I speak English), but I'm thinking of making a config section for any spec where you can set the parsing to RTL, which would switch the symbols for Forward and backward edges.
+This is biased right now towards people who read/write LTR languages (because I speak English), but I'm thinking of making a config section for any spec where you can set the parsing to RTL, which would switch the symbols for Forward and backward edges.
 
 There are three kinds: 
 - Forward `->`
