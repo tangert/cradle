@@ -20,6 +20,12 @@ Your Cradle spec is just text. It can either live as a text file you read, or as
 ### Syntax
 #### Nodes
 Nodes are just text. They're basically any alphanumeric character, and they represent the boxes you'd draw in a graph. You connect Nodes together with various kinds of arrows to form sequences.
+```
+this is a node
+```
+```
+this is a node too and it includes spaces
+```
 
 #### Sequences
 Sequences are the basic part of Cradle. Often when designing flows, we like to write things with arrows and events between them. For example:
