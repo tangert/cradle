@@ -14,7 +14,7 @@ start = Graph
 
 Graph "graph" = children: (Group / Sequence)+ {
     return {
-    	ast: children
+    	ast: children[0]
     }
  } 
 
@@ -78,19 +78,19 @@ LabeledEdge "labeled edge" = content:"("label:Node edge:UnlabeledEdge")" {
     }
 }
 
-UnlabeledEdge "unlabeled edge" = edge:(BidirectionalEdge/ForwardEdge/BackwardEdge) {
+UnlabeledEdge "unlabeled edge" = edge:(BiEdge/FEdge/BEdge) {
   return edge 
 }
 
-BidirectionalEdge "bidirectional edge" = content:"<->" {
+BiEdge "bidirectional edge" = content:"<->" {
   return { type: "edge", kind: "bi", content } 
 }
 
-ForwardEdge "forward edge" = content:"->" {
+FEdge "forward edge" = content:"->" {
   return { type: "edge", kind: "forward", content } 
 }
 
-BackwardEdge "backward edge" = content:"<-" {
+BEdge "backward edge" = content:"<-" {
   return { type: "backward", kind: "backward", content } 
 }
 
