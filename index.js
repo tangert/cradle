@@ -103,15 +103,7 @@ log(userFlowAST)
 // const nodes = ['a', 'b', 'c', 'd', 'e', 'b', 'e', 'f', 'e']
 // const sequence = `${nodes.slice(1).reduce((acc,curr, idx) => acc + '->' + curr, nodes[0])}`
 
-const sequence = `test group {
-  a <-> b <-> c <-> d -> e -> f <-> g,
-  cool <-> beans,
-  awesome -> dude,
-}`
-
-const parsedSequence = parser.parse(sequence)
-
-// TODO: handle groups.
+// TODO: handle sub / nested groups.
 const buildGraph = (ast) => {
   let graph = {}
   // To determine how to add edges into the list
@@ -223,6 +215,15 @@ const cradleToDOT = (input) => {
   const graph = buildGraph(parsed.ast)
   // create the DOT string
 }
+
+
+const sequence = `test group {
+  a <-> b <-> c <-> d -> e -> f <-> g,
+  cool <-> beans,
+  awesome -> dude,
+}`
+
+const parsedSequence = parser.parse(sequence)
 
 
 log("original sequence: ")
