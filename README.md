@@ -1,12 +1,12 @@
-# What is Dagger?
+# What is Cradle?
 
-Dagger is a DSL for designing interactions and experiences. Interaction and UX design involve complex logic and structure, but our tools for designing experiences are often limited to drawing boxes+arrows manually in Figma/Sketch/Omnigraffle/whatever flavor of mind mapping or wireframing tool you use, using complex JavaScript libraries, learning DOT or UML (which are not intended for design), or just using natural language. Dagger's intent is to try formalize experience and interaction design as code.
+Cradle is a DSL for designing interactions and experiences. Interaction and UX design involve complex logic and structure, but our tools for designing experiences are often limited to drawing boxes+arrows manually in Figma/Sketch/Omnigraffle/whatever flavor of mind mapping or wireframing tool you use, using complex JavaScript libraries, learning DOT or UML (which are not intended for design), or just using natural language. Cradle's intent is to try formalize experience and interaction design as code.
 
-More specifically, Dagger is a DSL (domain specific language) for building DAGs (directed acyclic graphs) in an intuitive way that resembles natural language. It lets you write with whitespace, nest things in hierarchies easily, and create different kinds of links between nodes easily. It's not "feature complete" or intended to be a complete replacement for DOT (especially its renderer), but that's not the point. It's supposed to be easy to use and get the job done. It is also not a new concept to think of UIs and UX with state machines and graphs. But the emphasis in Dagger here is on syntax and ease of use. It should feel like writing, but just a little bit more structured.
+More specifically, Cradle is a DSL (domain specific language) for building graphs in an intuitive way that resembles natural language. It lets you write with whitespace, nest things in hierarchies easily, and create different kinds of links between nodes easily. It's not "feature complete" or intended to be a complete replacement for DOT (especially its renderer), but that's not the point. It's supposed to be easy to use and get the job done. It is also not a new concept to think of UIs and UX with state machines and graphs. But the emphasis in Cradle here is on syntax and ease of use. It should feel like writing, but just a little bit more structured.
 
 (link to prior art)
 
-Dagger is opinionated and takes the stance that design specs should be: 
+Cradle is opinionated and takes the stance that design specs should be: 
 - Versionable
 - Portable - not stuck in any specific design program
 - Visualizable
@@ -15,14 +15,14 @@ Dagger is opinionated and takes the stance that design specs should be:
 
 # How does it work?
 
-Your dagger spec is just text. It can either live as a text file you read, or as a string in code. Here are the basics of the syntax
+Your Cradle spec is just text. It can either live as a text file you read, or as a string in code. Here are the basics of the syntax
 
 ### Syntax
 #### Nodes
 Nodes are just text. They're basically any alphanumeric character, and they represent the boxes you'd draw in a graph. You connect Nodes together with various kinds of arrows to form sequences.
 
 #### Sequences
-Sequences are the basic part of Dagger. Often when designing flows, we like to write things with arrows and events between them. For example:
+Sequences are the basic part of Cradle. Often when designing flows, we like to write things with arrows and events between them. For example:
 ```
 step 1 -> step 2 -> step 3
 ```
@@ -49,7 +49,7 @@ Let's get a practical example in here. If you're designing basic interactions fo
 menu (on click ->) open popover
 ```
 
-Now, apps usually have tons of different flows/sequences grouped together. How do we group them in Dagger? Groups!
+Now, apps usually have tons of different flows/sequences grouped together. How do we group them in Cradle? Groups!
 
 #### Groups
 A group allows you to make lists of sequences and other groups.
@@ -86,8 +86,8 @@ High priority:
 - A renderer (which takes the AST and has an opinonated set of SVG objects and / or React components that will let you create interactive graphs).
 
 After:
-- An interactive CLUI app for specifying dagger graphs and interacting with them through text and clicking
-- A Figma Dagger plugin that let's you automatically render 
+- An interactive CLUI app for specifying Cradle graphs and interacting with them through text and clicking
+- A Figma Cradle plugin that let's you automatically render 
 
 While this is optimized for brainstorming quickly, it can also just be used as a base for mindmapping tools in general and runs wherever JavaScript runs. Because these graphs are just strings and can be used inside of any javascript app, you can just use string interpolation to atuomate building parts of your graph. Like this!
 

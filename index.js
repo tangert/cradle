@@ -46,7 +46,7 @@ const sampleInputs = [
 function walk(tree) {
   tree.forEach(child => {
     if(child.type === 'group') {
-      log(child.start.content)
+      child.start && log(child.start.content)
     } else if (child.content) {
       log(child.content)
     }
@@ -56,7 +56,27 @@ function walk(tree) {
   })
 }
 
-sampleInputs.slice(1,3).forEach(inp => {
+/*
+this creates an adjancency list from the ast
+{
+  1: [2]
+  2: [3, 4, 5]
+}
+*/
+// assumes global. unique name space
+function createGraph(ast) {
+  // how to parse sequences
+  // 1 -> 2 -> 3 -> 4
+
+  // keep track of the last reference node
+  // you get to a node
+  // if it's 
+
+  // how to parse groups
+
+}
+
+sampleInputs.forEach(inp => {
   const parsed = parser.parse(inp)
   log("\n")
   log("INPUT:")

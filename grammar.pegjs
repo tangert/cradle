@@ -79,7 +79,7 @@ UnlabeledEdge "unlabeled edge" = edge:(BiEdge/FEdge/BEdge) {
 }
 
 BiEdge "bidirectional edge" = content:"<->" {
-  return { type: "edge", kind: "bi", content } 
+  return { type: "edge", kind: "bidirectional", content } 
 }
 
 FEdge "forward edge" = content:"->" {
