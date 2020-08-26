@@ -6,14 +6,23 @@ Cradle has an intuitive syntax that lets you write with whitespace, nest things 
 
 It's not "feature complete" or intended to be a complete replacement for DOT (especially its renderer), but that's not the point. It's supposed to be easy to use and get the job done. It is also not a new concept to think of UIs and UX with state machines and graphs. But the emphasis in Cradle here is on syntax and ease of use.
 
-(link to prior art)
-
 Cradle is opinionated and takes the stance that design specs should be: 
 - Versionable
 - Portable - not stuck in any specific design program
 - Visualizable
 - Lintable
 - Testable - error handling is huge in UX! 
+
+Prior art and references:
+- https://sketch.systems/
+- https://pegjs.org/online
+- https://lezer.codemirror.net/
+- https://www.antlr.org/
+- https://js.cytoscape.org/
+- https://github.com/mattrasto/phase
+- https://flowchart.js.org/
+- https://github.com/davidkpiano/xstate
+- https://rsms.me/graphviz/
 
 # How does it work?
 
