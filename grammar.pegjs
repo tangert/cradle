@@ -6,11 +6,9 @@
   }
 }
 
-start = Graph
+// BUG: the last node in the sequence is getting it's first letter cut off
 
-// BUG: the last node in teh sequence is getting iti's first letter cut off
-// Finally build the graph
-// This is where the magic happens!
+start = Graph
 
 Graph "graph" = children: (Group / Sequence)+ {
     return {
@@ -24,11 +22,11 @@ Group "group" = children: (Node?_ (GroupOpener _ ( ((Group/Sequence)","_) / (Gro
 	  return {
     	type: "group",
         start: children[0],
-        children: flatten(children.slice(1)).filter(c => c
-        										  && c.type !== 'whitespace' 
-        										  && c.type !== 'groupOpener'
-                                                  && c.type !== 'groupCloser'
-                                                  && c !== ',')
+        children: flatten(children.slice(1)).filter(c => c 
+                                                      && c.type !== 'whitespace' 
+                                                      && c.type !== 'groupOpener'
+                                                      && c.type !== 'groupCloser'
+                                                      && c !== ',')
     }
 }
 
@@ -36,8 +34,6 @@ Group "group" = children: (Node?_ (GroupOpener _ ( ((Group/Sequence)","_) / (Gro
 Sequence "sequence"  = children:(NodeEdgeUnit _)+ {
 	return {
     	type: "sequence",
-        // should this be responsibile for combing the liist into  one thing?
-        // probably
         children: flatten(children.flat().filter(c => c.type !== 'whitespace').map(c => c.children))
     }
 }

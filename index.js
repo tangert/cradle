@@ -63,7 +63,6 @@ sampleInputs.slice(1,3).forEach(inp => {
   log(inp)
   log("AST:")
   log(parsed)
-  log(parsed.ast.length)
   walk(parsed.ast)
   log("\n")
 })
