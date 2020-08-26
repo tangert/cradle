@@ -1,4 +1,5 @@
 {
+  // Used to arbitrarily flatten
   function flatten(arr) {
     return arr.reduce(function (flat, toFlatten) {
       return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
@@ -6,8 +7,7 @@
   }
 }
 
-// BUG: the last node in the sequence is getting it's first letter cut off
-
+// Entry point for the grammar
 start = Graph
 
 Graph "graph" = children: (Group / Sequence)+ {
@@ -16,8 +16,11 @@ Graph "graph" = children: (Group / Sequence)+ {
     }
  } 
 
-// ONCE AGAIN THE PROBLEM IS NESTED BRANCHES
 
+/*******************
+      Group
+*******************/
+// Either seprate them by commas or just have a regular unit
 Group "group" = children: (Node?_ (GroupOpener _ ( ((Group/Sequence)","_) / (Group/Sequence)_)* _ GroupCloser) _) {
 	  return {
     	type: "group",
@@ -27,14 +30,6 @@ Group "group" = children: (Node?_ (GroupOpener _ ( ((Group/Sequence)","_) / (Gro
                                                       && c.type !== 'groupOpener'
                                                       && c.type !== 'groupCloser'
                                                       && c !== ',')
-    }
-}
-
-// Either seprate them by commas or just have a regular unit
-Sequence "sequence"  = children:(NodeEdgeUnit _)+ {
-	return {
-    	type: "sequence",
-        children: flatten(children.flat().filter(c => c.type !== 'whitespace').map(c => c.children))
     }
 }
 
@@ -52,6 +47,18 @@ GroupCloser = char: "}" {
     }
 }
 
+/*******************
+      Sequence
+*******************/
+// TODO?: the last node in the sequence is getting it's first letter cut off
+Sequence "sequence"  = children:(NodeEdgeUnit _)+ {
+	return {
+    	type: "sequence",
+        children: flatten(children.flat().filter(c => c.type !== 'whitespace').map(c => c.children))
+    }
+}
+
+// Combines nodes and edges into tuples, which are then combined into sequences
 NodeEdgeUnit "unit" = unit:(_ Node _ Edge*) {
 	return {
     	type: 'nodeEdgeUnit',
@@ -59,11 +66,14 @@ NodeEdgeUnit "unit" = unit:(_ Node _ Edge*) {
     }
 }
 
+
+/*******************
+      Edges
+*******************/
 Edge "edge" = edge:(LabeledEdge / UnlabeledEdge) {
   return edge
 }
 
-// Edges
 // Labeled edges wrap arrows in parens and let you write text
 LabeledEdge "labeled edge" = content:"("label:Node edge:UnlabeledEdge")" {
   return {
@@ -74,6 +84,7 @@ LabeledEdge "labeled edge" = content:"("label:Node edge:UnlabeledEdge")" {
     }
 }
 
+// This is basically a "regular" edge
 UnlabeledEdge "unlabeled edge" = edge:(BiEdge/FEdge/BEdge) {
   return edge 
 }
@@ -90,6 +101,10 @@ BEdge "backward edge" = content:"<-" {
   return { type: "edge", variant: "backward", content } 
 }
 
+/*******************
+      Node
+*******************/
+// Joins words and spaces together
 Node "node" = content:(Word InterwordWs)+ {
   return {
       type: "node",
@@ -97,12 +112,12 @@ Node "node" = content:(Word InterwordWs)+ {
     }
 }
 
-// One level up
+// Used for spaces within nodes themselves
 InterwordWs "interword whitespace" = ws:_ {
   return ws.content.join("")
 }
 
-// Basics
+// 
 Word "word" = letters:letter+ {
   return letters.join("")
 }
