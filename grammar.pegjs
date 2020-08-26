@@ -5,6 +5,14 @@
       return flat.concat(Array.isArray(toFlatten) ? flatten(toFlatten) : toFlatten);
     }, []);
   }
+
+  function last(arr) {
+    return arr[arr.length-1]
+  }
+
+  function first(arr) {
+    return arr[0]
+  }
 }
 
 // Entry point for the grammar

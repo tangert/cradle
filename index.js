@@ -63,9 +63,6 @@ function walk(tree) {
   })
 }
 
-
-
-
 /*
 this creates an adjancency list from the ast
 {
@@ -77,15 +74,29 @@ this creates an adjancency list from the ast
 function createGraph(ast) {
   // how to parse sequences
   // 1 -> 2 -> 3 -> 4
-
   // keep track of the last reference node
   // you get to a node
   // if it's 
-
   // how to parse groups
-
 }
 
+// Will take the ast and simple turn it into an object with string keys and values 
+function createObject(ast) {
+  // need deep updates, maybe lodash can come in handy here?
+  // let obj = {}
+  // let last key
+  // function walk(ast) {
+  //   ast.forEach(child => {
+  //     if(child.type === 'group') {
+  //       if(child.start) {
+  //         obj[child.start.content] = []
+  //       } else if (child.content) {
+
+  //       }
+  //     }
+  //   })
+  // }
+}
 sampleInputs.forEach(inp => {
   const parsed = parser.parse(inp)
   log("\n")
