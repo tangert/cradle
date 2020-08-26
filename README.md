@@ -106,6 +106,8 @@ menu interactions {
   - Should that be included in the graph itself (like DOT) or handled outside?
 - Parameterization?
   - Should this be owned by Cradle or left up to the host language?
+- Functions?
+  - Should Cradle have its own simple version of functions that can take an input, parameterize it, and spit out an output?
 - Types?
   - Should nodes and edges have types? More specifically, can we easily allow users to make their own types or templates of Nodes and Edges?
 - Variables / references / aliases / node scope? 
