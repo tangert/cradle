@@ -100,8 +100,21 @@ menu interactions {
 }
 ```
 
-# In progress
 
+# Open questions:
+- How to handle styling?
+  - Should that be included in the graph itself (like DOT) or handled outside?
+- Parameterization?
+  - Should this be owned by Cradle or left up to the host language?
+- Types?
+  - Should nodes and edges have types? More specifically, can we easily allow users to make their own types or templates of Nodes and Edges?
+- Variables / references / aliases / node scope? 
+  - Can nodes have multiple names / references? If so, what's the easiest syntax to do that? 
+  - Should everything be in a global namespace?
+  - What if you could refer to nodes by their parents using dot notation or array indexing?
+  - `(user flow).(step 1)`, `(user flow).0`, `(user flow).first` could all refer to the same node
+
+# In progress
 High priority:
 - A parser (which exports the AST)
 - A transpiler (which converts the AST into either DOT or UML)

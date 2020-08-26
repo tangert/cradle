@@ -6,6 +6,8 @@ const last = (arr) => arr[arr.length-1]
 const grammar = fs.readFileSync("grammar.pegjs", "utf8")
 const parser = peg.generate(grammar)
 
+// syntax highlighting?
+
 const sampleInputs = [
   `step 1 -> step 2 (on ->) step 3`,
 
