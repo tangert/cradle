@@ -19,7 +19,7 @@ Graph "graph" = children: (Group / Sequence)+ {
  } 
 
 // ONCE AGAIN THE PROBLEM IS NESTED BRANCHES
-//Group "group" = children: (Node?_ (GroupOpener _ (((Group",") / Group) / ((Sequence",") / Sequence))* _ GroupCloser) _) {
+
 Group "group" = children: (Node?_ (GroupOpener _ ( ((Group/Sequence)","_) / (Group/Sequence)_)* _ GroupCloser) _) {
 	  return {
     	type: "group",

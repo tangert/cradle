@@ -2,7 +2,9 @@ const peg = require("pegjs")
 const fs = require("fs")
 const log = (s) => console.log(s)
 
-const daggerParser = peg.generate(fs.readFileSync("grammar.pegjs", "utf8"))
+const grammar = fs.readFileSync("grammar.pegjs", "utf8")
+const parser = peg.generate(grammar)
+
 const sampleInput = `step 1 -> step 2 (on ->) step 3`
 const signupFlows = `
 root {  
@@ -86,7 +88,7 @@ root {
 const test5 = `sweet`
 const test6 = `r{1{},2{3{}}}`
 
-const parsed = daggerParser.parse(test3)
+const parsed = parser.parse(test3)
 log(test3)
 log(parsed)
 // cool, now you have the AST!
