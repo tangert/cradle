@@ -9,7 +9,7 @@ const parser = peg.generate(grammar)
 // syntax highlighting?
 
 const sampleInputs = [
-  `step 1 -> step 2 (on ->) step 3`,
+  `step 1 -> step 2 (on click ->) step 3`,
 
   `root { 1 -> 2, 3 -> 4, subgraph { 1 -> 2 }}`,
 

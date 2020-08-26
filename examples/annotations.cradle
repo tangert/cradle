@@ -1,0 +1,36 @@
+annotations {
+	// getting to annotations
+
+	creating an annotation {
+		on highlight -> context menu -> annotation ui,
+		// this basically skips a step
+		on margin click -> annotation ui 
+	},
+
+	viewing annotations {
+		manually  {
+			go to an annotation (on click ->) annotation ui
+		},
+		// not figured out yet
+		automatically -> {
+			if you are in an annotated region (go ->) annotation ui 
+			(annotation ui).questions
+		}
+	},
+
+	// actual ui for it
+
+	annotation ui {
+		actions {
+			leave a message,
+			resolve annotation,
+			exit
+		},
+
+		questions {
+			should we update scroll position on every scroll event?,
+			should all annotations be visible at once?
+			should we leave an indicator in the margin?
+		}
+	}
+}
