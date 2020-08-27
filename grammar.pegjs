@@ -18,7 +18,7 @@
 // Entry point for the grammar
 start = Graph
 
-Graph "graph" = children: (Group / Sequence)+ {
+Graph "graph" = _ children: (Group / Sequence)+ _ {
     return {
     	ast: children
     }

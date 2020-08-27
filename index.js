@@ -211,7 +211,8 @@ const cradleToDOT = (input) => {
 }
 
 
-const sequence = `test group {
+const sequence = `
+test group {
   a <-> b <-> c <-> d -> e -> f <-> g,
   cool <-> beans,
   awesome -> dude,
