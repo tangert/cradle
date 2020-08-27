@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "pegjs": "^0.10.0",
-    "verbal-expressions": "^1.0.2"
+    "pegjs": "^0.10.0"
   }
 }

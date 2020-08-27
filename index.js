@@ -178,22 +178,16 @@ const buildGraph = (ast) => {
         lastNode = child
       }
     }
-    // keep a stack for last nodes...
     else if (child.type === 'group') {
-
       // Initialize
       if(!graph[child.start.content]) {
         graph[child.start.content] = []
       }
-      // when you find a group, you want its starting node to be connected to the first node of each of its childre
-      // if it's a sequence, that means the first node in that sequence,
-      // if it's another group, that means that group's start
-
-      // each node needs to be aware of whether it is the start of a sequence and whether its inside a group.
-      // can you keep track of this with one variable?
+      if(lastGroup) {
+        // add the edge if this is a subgroup
+        graph[lastGroup.start.content].push(child.start.content)
+      }
       lastGroup = child
-      lastNode = child
-
     }
     else if (child.type === 'sequence') {
       startOfSequence = true
@@ -221,6 +215,12 @@ const sequence = `test group {
   a <-> b <-> c <-> d -> e -> f <-> g,
   cool <-> beans,
   awesome -> dude,
+  subgroup {
+    wow -> hi,
+    another sub {
+      niceee -> owwooow
+    }
+  }
 }`
 
 const parsedSequence = parser.parse(sequence)
