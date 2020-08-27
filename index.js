@@ -1,6 +1,5 @@
-const peg = require("pegjs")
 const fs = require("fs")
-
+const peg = require("pegjs")
 
 // Utils
 const walk = (tree, callback) => {
@@ -98,12 +97,6 @@ const userFlowAST = parser.parse(userFlows)
 log(userFlows)
 log(userFlowAST)
 
-
-// String interpolation example
-// const nodes = ['a', 'b', 'c', 'd', 'e', 'b', 'e', 'f', 'e']
-// const sequence = `${nodes.slice(1).reduce((acc,curr, idx) => acc + '->' + curr, nodes[0])}`
-
-// TODO: handle sub / nested groups.
 const buildGraph = (ast) => {
   let graph = {}
   // To determine how to add edges into the list
@@ -118,7 +111,7 @@ const buildGraph = (ast) => {
   const Node = (content, label) => ({
     node: content,
     // Add a label if there's one
-    ...(label && { transition: label })
+    ...(label && { label })
     })
 
   // Walk over the nodes and build the graph.
@@ -199,6 +192,10 @@ const buildGraph = (ast) => {
   return graph
 }
 
+const flatternGraph = (graph) => {
+  // goes through. the graph and gets rid of adjacency lists and makes everything single nodes and node transitions.
+}
+
 
 const cradleToDOT = (input) => {
   // parse the sequence
@@ -206,7 +203,42 @@ const cradleToDOT = (input) => {
   // get the graph
   const graph = buildGraph(parsed.ast)
   // create the DOT string
-  log(graph)
+  // TODO: maybe convert it directly into the graph object?
+
+  const all = []
+  Object.entries(graph).forEach(e => {
+    // Handle groups
+    const _from = e[0]
+    const _to = e[1]
+    const withoutLabels = [] 
+    const withLabels = []
+    _to.forEach(n => {
+      if(n.label) {
+        withLabels.push(n)
+      } else {
+        withoutLabels.push(n)
+      }
+    })
+
+    // TODO: get fancier and only quote things if they contain spaces
+    if(withoutLabels.length > 1) {
+      all.push(`"${_from}"->{${withoutLabels.map(n => `"${n.node}"`)}}`)
+    } else if(withoutLabels.length === 1) {
+      all.push(`"${_from}"->"${withoutLabels[0].node}"`)
+    }
+    if(withLabels.length > 0) {
+      withLabels.forEach(n => {
+        all.push(`"${_from}"->"${n.node}" [label="${n.label}"]`)
+      })
+    }
+  })
+
+  const dotString = `digraph G {
+    ${all.join('\n')}
+  }`
+
+  return dotString
+
 }
 
 
@@ -224,13 +256,6 @@ test group {
   }
 }`
 
-
-const parsedSequence = parser.parse(sequence)
-
-
-log("original sequence: ")
-log(sequence)
-log("\nAST: ")
-log(parsedSequence.ast)
-log("\n dot conversion : ")
-const dot = cradleToDOT(sequence)
+const sequence2 = `step 1 -> step 2 (on click <->) step 3`
+const dot = cradleToDOT(sequence2)
+log(dot)
