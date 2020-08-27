@@ -166,7 +166,6 @@ const buildGraph = (ast) => {
       }
 
     }
-
     else if (child.type === 'group') {
       // Initialize
       if (!graph[child.start.content]) {
@@ -178,6 +177,7 @@ const buildGraph = (ast) => {
       }
       lastGroup = child
     }
+    
     else if (child.type === 'sequence') {
       startOfSequence = true
       lastSequenceLength = child.children.filter(c => c.type === 'node').length
@@ -254,8 +254,11 @@ test group {
       niceee -> owwooow
     }
   }
-}`
+}`;
 
-const sequence2 = `step 1 -> step 2 (on click <->) step 3`
-const dot = cradleToDOT(sequence2)
-log(dot)
+const sequence2 = `step 1 -> step 2 (on click <->) step 3`;
+
+[userFlows, sequence, sequence2].forEach( s => {
+  log('\n')
+  log(cradleToDOT(s))
+})
