@@ -199,11 +199,16 @@ const flatternGraph = (graph) => {
 
 const cradleToDOT = (input) => {
   // parse the sequence
+  log("INPUT: " + input)
+
   const parsed = parser.parse(input)
   // get the graph
   const graph = buildGraph(parsed.ast)
   // create the DOT string
   // TODO: maybe convert it directly into the graph object?
+
+  log("GRAPH: ")
+  log(graph)
 
   const all = []
   Object.entries(graph).forEach(e => {
@@ -238,7 +243,6 @@ const cradleToDOT = (input) => {
   }`
 
   return dotString
-
 }
 
 
@@ -256,9 +260,32 @@ test group {
   }
 }`;
 
+
+// TODO: nested things are broken again...
+const interactions = `
+draw {
+  with {
+    wow -> nice
+  },
+  on,
+  towards
+}
+`
+
+// const interactions = `
+//   draw {
+//     with {
+//       brush { on, towards },
+//       finger { on, towards }
+//     },
+//     on { canvas, screen },
+//     towards { edge, center }
+//   }
+// `
+
 const sequence2 = `step 1 -> step 2 (on click <->) step 3`;
 
-[userFlows, sequence, sequence2].forEach( s => {
+[userFlows, sequence, sequence2, interactions].forEach( s => {
   log('\n')
   log(cradleToDOT(s))
 })
