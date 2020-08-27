@@ -6,13 +6,13 @@ const fs = require("fs")
 const walk = (tree, callback) => {
   tree.forEach(child => {
     callback && callback(child);
-    if(child.children) {
+    if (child.children) {
       walk(child.children, callback)
     }
   })
 }
 const log = (s) => console.log(s)
-const last = (arr) => arr[arr.length-1]
+const last = (arr) => arr[arr.length - 1]
 
 // https://repl.it/@tangert/more-flow-dsl-sketching#index.js
 const grammar = fs.readFileSync("grammar.pegjs", "utf8")
@@ -46,7 +46,7 @@ const sampleInputs = [
       }
     }
   }`,
-  
+
   `root {
     1 {
       a -> b -> c
@@ -57,7 +57,7 @@ const sampleInputs = [
   }`,
 
   `r{1{},2{3{}}}`,
-  
+
   `{}`,
 ]
 
@@ -114,78 +114,74 @@ const buildGraph = (ast) => {
   let lastSequenceLength = 0;
   let startOfSequence = false;
 
+  // formats the node
+  const Node = (content, label) => ({
+    node: content,
+    // Add a label if there's one
+    ...(label && { label })
+    })
+
   // Walk over the nodes and build the graph.
   walk(ast, (child) => {
     // If you find a node, check what the last node was and the last edge to decide how to add it to the last
-    if(child.type === 'node') {
+    if (child.type === 'node') {
       // Initialize the adjacency list if it's not there.
-      if(!graph[child.content]) {
+      if (!graph[child.content]) {
         graph[child.content] = []
       }
 
-      // TODO: handle adding subgroups
-      if(lastGroup && startOfSequence) {
+      if (lastGroup && startOfSequence) {
         // You found the start of a sequence inside of a group.
         // Push the current one
-        // It's implied that a group is a forward edge...  figure out how to get around this
-        graph[lastGroup.start.content].push(child.content)
+        // It's implied that a group is a forward edge
+        graph[lastGroup.start.content].push(Node(child.content))
         startOfSequence = false;
       }
 
-
-      if(lastEdge && lastNode) {
+      if (lastEdge && lastNode) {
         // found a connection!
         // add it onto the last node's list :)
-        const curr = child.content
-        const last = lastNode.content
+        let _to = Node(child.content, lastEdge.label)
+        let _from = Node(lastNode.content, lastEdge.label)
 
-        // Based on the different edge directions, add the nodes you find to the appropriate list.
-        switch(lastEdge.direction) {
-          case "forward":
-            // add the current one to the last node's list
-            if(!graph[last].includes(curr)) {
-              graph[last].push(curr);
-            }
-            break;
-          case "backward":
-            // add the last node to the current one's list
-            if(!graph[curr].includes(last)) {
-              graph[curr].push(last)
-            }
-            break;
-          case "bi":
-            // Add them to each other's list
-            if(!graph[curr].includes(last)) {
-              graph[curr].push(last)
-            }
-            if(!graph[last].includes(curr)) {
-              graph[last].push(curr);
-            }
-            break;
-          default:
-            return
+        // Switch direction if it's backward
+        if (lastEdge.direction === 'backward') {
+          const tmp = _to
+          _to = _from
+          _from = tmp
+        }
+
+        // Add the edges 
+        if (!graph[_from.node].includes(_to.node)) {
+          graph[_from.node].push(_to)
+        }
+
+        // If it's bidirectional, add the reverse as well.
+        if (lastEdge.direction === 'bi' && !graph[_to.node].includes(_from.node)) {
+          graph[_to.node].push(_from);
         }
       }
 
       lastSequenceLength--;
-
       // got to the end of a sequence
-      if(lastSequenceLength === 0) {
+      if (lastSequenceLength === 0) {
         // once you reach the end of a sequence set the last node and edge to null so you have a fresh start
         lastNode = null
         lastEdge = null
       } else {
         lastNode = child
       }
+
     }
+
     else if (child.type === 'group') {
       // Initialize
-      if(!graph[child.start.content]) {
+      if (!graph[child.start.content]) {
         graph[child.start.content] = []
       }
-      if(lastGroup) {
+      if (lastGroup) {
         // add the edge if this is a subgroup
-        graph[lastGroup.start.content].push(child.start.content)
+        graph[lastGroup.start.content].push(Node(child.start.content))
       }
       lastGroup = child
     }
@@ -194,7 +190,8 @@ const buildGraph = (ast) => {
       lastSequenceLength = child.children.filter(c => c.type === 'node').length
     }
     // If you find an edge, store it to define how the next node you find gets added to the list
-    else if(child.type === 'edge') {
+    else if (child.type === 'edge') {
+      // check for labels where to store them.
       lastEdge = child
     }
   })
@@ -202,12 +199,14 @@ const buildGraph = (ast) => {
   return graph
 }
 
+
 const cradleToDOT = (input) => {
   // parse the sequence
   const parsed = parser.parse(input)
   // get the graph
   const graph = buildGraph(parsed.ast)
   // create the DOT string
+  log(graph)
 }
 
 
@@ -215,7 +214,8 @@ const sequence = `
 test group {
   a <-> b <-> c <-> d -> e -> f <-> g,
   cool <-> beans,
-  awesome -> dude,
+  awesome (on click ->) dude,
+  back <- to back,
   subgroup {
     wow -> hi,
     another sub {
@@ -224,6 +224,7 @@ test group {
   }
 }`
 
+
 const parsedSequence = parser.parse(sequence)
 
 
@@ -231,6 +232,5 @@ log("original sequence: ")
 log(sequence)
 log("\nAST: ")
 log(parsedSequence.ast)
-log("\ngraph: ")
-const g = buildGraph(parsedSequence.ast)
-log(g)
+log("\n dot conversion : ")
+const dot = cradleToDOT(sequence)
