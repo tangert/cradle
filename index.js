@@ -118,7 +118,7 @@ const buildGraph = (ast) => {
   const Node = (content, label) => ({
     node: content,
     // Add a label if there's one
-    ...(label && { label })
+    ...(label && { transition: label })
     })
 
   // Walk over the nodes and build the graph.
