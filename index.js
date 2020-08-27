@@ -244,7 +244,7 @@ const cradleToDOT = (input) => {
 
 const sequence = `
 test group {
-  a <-> b <-> c <-> d -> e -> f <-> g,
+  a <-> b <-> c (wow <->) d -> e -> f <-> g,
   cool <-> beans,
   awesome (on click ->) dude,
   back <- to back,

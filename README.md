@@ -129,19 +129,10 @@ menu interactions {
 
 # In progress
 High priority:
-- A parser (which exports the AST)
-- A transpiler (which converts the AST into either DOT or UML)
-- A renderer (which takes the AST and has an opinonated set of SVG objects and / or React components that will let you create interactive graphs).
+[x] A parser (which exports the AST)
+[x] A transpiler (which converts the AST into DOT)
+[ ] A renderer (which takes the AST and has an opinonated set of SVG objects and / or React components that will let you create interactive graphs).
 
 After:
 - An interactive CLUI app for specifying Cradle graphs and interacting with them through text and clicking
 - A Figma Cradle plugin that let's you automatically render 
-
-While this is optimized for brainstorming quickly, it can also just be used as a base for mindmapping tools in general and runs wherever JavaScript runs. Because these graphs are just strings and can be used inside of any javascript app, you can just use string interpolation to atuomate building parts of your graph. Like this!
-
-```javascript
-const companies = ['apple', 'google', 'microsoft', 'replit']
-const flow = `
-    sign in with { ${companies.join(",")} -> go to oauth }
-`
-```
