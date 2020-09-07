@@ -285,7 +285,96 @@ draw {
 
 const sequence2 = `step 1 -> step 2 (on click <->) step 3`;
 
-[userFlows, sequence, sequence2, interactions].forEach( s => {
-  log('\n')
-  log(cradleToDOT(s))
-})
+// rename "content" to "data"
+
+const buildNodeEdgeList = (ast) => {
+  // want to build a thing of nodes and edges...
+  // Nodes: [{ data: any }]
+  // Edges: [{ source: Node, target: Node, direction: forward/backward}]
+
+  // In memory dict for checking if ndoes have been added already
+  const nodesAdded = {}
+  // stringify the edges to quickly check.
+  let edgesAdded = {}
+  const graph = {
+    nodes: [],
+    edges: []
+  }
+
+  let lastSequence;
+  let lastGroup;
+  let lastEdge;
+
+  // formatter functions
+  const Node = (data) => ({ data })
+  const Edge = (source, target, data) => ({ source, target, data })
+  const EdgeKey = (edge) => `${edge.source.data}-${edge.target.data}`
+
+  walk(ast, (child) => {
+    if(child.type === 'node') {
+
+      // First, add the node
+      if(!nodesAdded[child.content]) {
+        graph.nodes = [...graph.nodes, Node(child.content)]
+      }
+      nodesAdded[child.content] = true
+
+      // Check if there's a connection
+      if (lastEdge && lastNode) {
+        // found a connection!
+        // add it onto the last node's list :)
+        let target = Node(child.content)
+        let source = Node(lastNode.content)
+
+        log(lastEdge)
+
+        // Switch direction if it's backward
+        if (lastEdge.direction === 'backward') {
+          const tmp = target
+          target = source
+          source = tmp
+        }
+        
+        const edge = Edge(source, target, lastEdge.label)
+        const edgeKey = EdgeKey(edge)
+        
+        if(!edgesAdded[edgeKey]){
+          graph.edges = [...graph.edges, edge]
+        }
+
+        // If it's bidirectional, add the reverse as well.
+        if (lastEdge.direction === 'bi') {
+          // create the reverse one
+          const e = Edge(target, source, lastEdge.label)
+          const ek = EdgeKey(e)
+          if(!edgesAdded[ek]){
+            graph.edges = [...graph.edges, e]
+          }
+          edgesAdded[EdgeKey(e)] = true
+        }
+
+        
+        // add the edge
+        edgesAdded[EdgeKey(edge)] = true
+      }
+
+      lastNode = child
+
+    } else if (child.type === 'group') {
+      lastGroup = child;
+    } else if(child.type === 'sequence') {
+      lastSequence = child
+    } else if (child.type === 'edge') {
+      lastEdge = child
+    }
+  })
+
+  return graph
+}
+
+const neList = buildNodeEdgeList(parser.parse(sequence).ast)
+log(neList)
+// [userFlows, sequence, sequence2, interactions].forEach( s => {
+//   log('\n')
+//   // log(cradleToDOT(s))
+// })
